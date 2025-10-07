@@ -1,0 +1,1 @@
+export type IProdcut = { id: number, name: string, price: number, description: string };// Define the IProdcut type

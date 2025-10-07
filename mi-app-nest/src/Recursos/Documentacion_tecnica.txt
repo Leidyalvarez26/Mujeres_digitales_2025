@@ -1,0 +1,264 @@
+Documentación técnica
+Autora:
+Leidy Johana Álvarez Valencia
+
+
+Programa: Mujeres digitales
+
+
+Fecha
+Octubre 2025
+ 
+Documentación Técnica - API de Inventario NestJS
+Tabla de Contenidos
+1.	Descripción General
+2.	Tecnologías Utilizadas
+3.	Estructura del Proyecto
+4.	Configuración e Instalación
+5.	Endpoints de la API
+6.	Modelos de Datos
+7.	Validaciones
+8.	Testing con Postman
+Descripción General
+API RESTful de sistema de inventario desarrollada con NestJS que gestiona usuarios, productos, proyectos y movimientos de inventario.
+Tecnologías Utilizadas
+•	NestJS - Framework backend
+•	TypeScript - Lenguaje de programación
+•	Class Validator - Validación de datos
+•	Class Transformer - Transformación de datos
+•	Postman - Testing de API
+Estructura del Proyecto
+text
+src/
+├── main.ts
+├── app.module.ts
+├── users/
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   └── dto/
+├── projects/
+│   ├── projects.controller.ts
+│   ├── projects.service.ts
+│   └── dto/
+└── library/
+    ├── library.controller.ts
+    ├── library.service.ts
+    └── dto/
+Configuración e Instalación
+Prerrequisitos
+•	Node.js (v16 o superior)
+•	npm o yarn
+•	Postman para testing
+Instalación
+bash
+# Clonar el proyecto
+git clone <repository-url>
+cd inventory-nest
+
+# Instalar dependencias
+npm install
+
+# Ejecutar en desarrollo
+npm run start:dev
+
+# La aplicación estará en http://localhost:3000
+Endpoints de la API
+Módulo de Usuarios
+GET /users
+Descripción: Obtiene todos los usuarios
+Respuesta:
+json
+[
+  {
+    "id": 1,
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "age": 30
+  }
+]
+GET /users/:id
+Descripción: Obtiene un usuario específico
+Parámetros: id - ID del usuario
+POST /users
+Descripción: Crea un nuevo usuario
+Body:
+json
+{
+  "name": "string (requerido)",
+  "email": "string (requerido, formato email)",
+  "age": "number (requerido, positivo)",
+  "password": "string (requerido, 6-10 chars, mayúscula, minúscula, número, especial)"
+}
+PATCH /users/:id
+Descripción: Actualiza un usuario existente
+Body: (campos opcionales)
+json
+{
+  "name": "string",
+  "email": "string",
+  "age": "number"
+}
+DELETE /users/:id
+Descripción: Elimina un usuario
+Módulo de Biblioteca
+GET /library/products
+Descripción: Obtiene todos los productos
+GET /library/products/:name
+Descripción: Obtiene producto por nombre
+POST /library/products
+Descripción: Crea un nuevo producto
+Body:
+json
+{
+  "name": "string (requerido)",
+  "price": "number",
+  "category": "string"
+}
+PATCH /library/products/:name
+Descripción: Actualiza un producto
+DELETE /library/products/:name
+Descripción: Elimina un producto
+Módulo de Proyectos
+GET /projects/:character
+Descripción: Obtiene proyectos por carácter
+POST /projects
+Descripción: Crea un nuevo proyecto
+Body:
+json
+{
+  "name": "string (requerido)",
+  "type": "string (requerido)",
+  "quantity": "number (requerido, entero, mínimo 1)"
+}
+POST /projects/combine-projects
+Descripción: Combina proyectos
+DELETE /projects/:id
+Descripción: Elimina un proyecto
+Modelos de Datos
+Usuario
+typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+Producto
+typescript
+interface Product {
+  name: string;
+  price: number;
+  category: string;
+  stock?: number;
+}
+Proyecto
+typescript
+interface Project {
+  id: number;
+  name: string;
+  type: string;
+  quantity: number;
+  createdAt: Date;
+}
+✅ Validaciones
+Usuarios
+•	nombre: string, no vacío
+•	email: string, formato email válido
+•	edad: number, entero, positivo
+•	contraseña:
+o	6-10 caracteres
+o	Al menos 1 mayúscula
+o	Al menos 1 minúscula
+o	Al menos 1 número
+o	Al menos 1 carácter especial
+Proyectos
+•	nombre: string, no vacío
+•	tipo: string, no vacío
+•	cantidad: number, entero, mínimo 1
+Testing con Postman
+Configuración de Variables
+javascript
+// Environment Variables
+baseUrl: http://localhost:3000
+token: (para autenticación futura)
+Flujo de Testing Recomendado
+1.	Crear Usuario
+http
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Usuario Test",
+  "email": "test@example.com",
+  "age": 25,
+  "password": "Pass123!"
+}
+Obtener Usuarios
+http
+GET {{baseUrl}}/users
+Crear Proyecto
+http
+POST {{baseUrl}}/projects
+Content-Type: application/json
+
+{
+  "name": "Proyecto Demo",
+  "type": "Desarrollo",
+  "quantity": 5
+}
+Gestionar Productos
+http
+GET {{baseUrl}}/library/products
+POST {{baseUrl}}/library/products
+Scripts de Test en Postman
+javascript
+// Test de respuesta exitosa
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+// Test de estructura JSON
+pm.test("Response has correct structure", function () {
+    const response = pm.response.json();
+    pm.expect(response).to.have.property('data');
+    pm.expect(response).to.have.property('message');
+});
+
+// Test de tiempo de respuesta
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(500);
+});
+Manejo de Errores
+La API retorna códigos HTTP estándar:
+•	200 - OK
+•	201 - Creado
+•	400 - Bad Request (validaciones fallidas)
+•	404 - No encontrado
+•	500 - Error interno del servidor
+Ejemplo de error de validación:
+json
+{
+  "message": [
+    "La edad no puede ser negativa",
+    "password should not be empty"
+  ],
+  "error": "Bad Request",
+  "statusCode": 400
+}
+Flujos de Trabajo Comunes
+Creación de Usuario y Proyecto
+1.	Registrar usuario nuevo
+2.	Crear proyecto asociado
+3.	Verificar datos creados
+Gestión de Inventario
+1.	Consultar productos existentes
+2.	Agregar nuevos productos
+3.	Actualizar stock
+4.	Eliminar productos obsoletos
+________________________________________
+Soporte
+Para issues y preguntas técnicas, consultar la documentación o crear un issue en el repositorio del proyecto.
+
